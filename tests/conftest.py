@@ -1,18 +1,17 @@
-"""Shared fixtures for the ha_integration_domain tests."""
+"""Shared fixtures for EEM Online tests."""
 
 from collections.abc import Generator
-from typing import Any
+from datetime import date
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ha_integration_domain.const import DOMAIN
+from custom_components.eem_online.const import CONF_CONTRACT, DOMAIN
+from custom_components.eem_online.coordinator.statistics import period_start
+from custom_components.eem_online.data import EemOnlineDailyConsumption
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-
-# The response the demo endpoint returns; the client turns it into the device payload.
-API_RESPONSE: dict[str, Any] = {"userId": 1, "id": 1, "title": "demo", "body": "demo"}
 
 
 @pytest.fixture(autouse=True)
@@ -21,41 +20,67 @@ def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
 
 
 @pytest.fixture
-def mock_api() -> Generator[AsyncMock]:
-    """Replace the client's HTTP layer, keeping its payload logic under test."""
-    with patch(
-        "custom_components.ha_integration_domain.api.client.IntegrationBlueprintApiClient._api_wrapper",
-        new_callable=AsyncMock,
-        return_value=API_RESPONSE,
-    ) as api_wrapper:
-        yield api_wrapper
+def mock_recorder_before_hass(recorder_db_url: str) -> None:
+    """Prepare the recorder database URL before Home Assistant starts."""
 
 
 @pytest.fixture
 def config_entry() -> MockConfigEntry:
-    """Return a config entry for this integration."""
+    """Return a configured EEM contract."""
     return MockConfigEntry(
         domain=DOMAIN,
-        title="demo",
-        unique_id="demo",
-        data={CONF_USERNAME: "demo", CONF_PASSWORD: "secret"},
+        title="EEM Online 123456",
+        unique_id="123456",
+        data={CONF_USERNAME: "123", CONF_PASSWORD: "secret", CONF_CONTRACT: "123456"},
     )
 
 
 @pytest.fixture
+def mock_api_client() -> Generator[AsyncMock]:
+    """Replace the EEM client used during config-entry setup."""
+    with patch("custom_components.eem_online.EemOnlineApiClient", autospec=True) as client_class:
+        client = client_class.return_value
+        client.async_get_weekly_summary.return_value = {
+            "consumos": [
+                {
+                    "data": "2026-09-12",
+                    "consumoCheias": 1.0,
+                    "consumoVazio": 2.0,
+                    "consumoPonta": 0.5,
+                },
+            ],
+        }
+        client.async_get_meter_readings.return_value = [
+            {
+                "data": "2026-09-12T00:00:00",
+                "totalRegistadores": 10182.0,
+            },
+        ]
+        yield client
+
+
+@pytest.fixture
+def mock_statistics() -> Generator[AsyncMock]:
+    """Avoid the recorder in tests unrelated to statistic persistence."""
+    result = [EemOnlineDailyConsumption(date(2026, 9, 12), period_start(date(2026, 9, 12)), 3.5)]
+    with patch(
+        "custom_components.eem_online.coordinator.base.async_sync_statistics",
+        new_callable=AsyncMock,
+        return_value=result,
+    ) as sync:
+        yield sync
+
+
+@pytest.fixture
 async def init_integration(
+    recorder_mock: object,
     hass: HomeAssistant,
-    mock_api: AsyncMock,
     config_entry: MockConfigEntry,
+    mock_api_client: AsyncMock,
+    mock_statistics: AsyncMock,
 ) -> MockConfigEntry:
-    """
-    Set up the integration from a config entry.
-
-    Returns:
-        The config entry, now loaded.
-
-    """
+    """Load the integration and return its config entry."""
     config_entry.add_to_hass(hass)
-    await hass.config_entries.async_setup(config_entry.entry_id)
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
     await hass.async_block_till_done()
     return config_entry

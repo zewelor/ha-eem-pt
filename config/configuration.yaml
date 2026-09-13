@@ -46,6 +46,9 @@ scene:
 # https://www.home-assistant.io/integrations/history/
 history:
 
+# https://www.home-assistant.io/integrations/energy/
+energy:
+
 # https://www.home-assistant.io/integrations/logbook/
 logbook:
 
@@ -140,4 +143,4 @@ logger:
     homeassistant.config_entries: info
 
     # Your integration debug logging - shows EVERYTHING from your integration
-    custom_components.ha_integration_domain: debug
+    custom_components.eem_online: debug

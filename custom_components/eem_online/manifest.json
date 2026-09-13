@@ -1,0 +1,17 @@
+{
+  "domain": "eem_online",
+  "name": "EEM Online",
+  "codeowners": [
+    "@zewelor"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "recorder"
+  ],
+  "documentation": "https://github.com/zewelor/ha-eem-pt",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/zewelor/ha-eem-pt/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

@@ -1,5 +1,5 @@
 {
-  "name": "Integration blueprint",
-  "homeassistant": "2026.8.0",
+  "name": "EEM Online",
+  "homeassistant": "2026.9.2",
   "hacs": "2.0.5"
 }

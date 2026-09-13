@@ -1,0 +1,12 @@
+{
+  "entity": {
+    "sensor": {
+      "latest_consumption": {
+        "default": "mdi:lightning-bolt"
+      },
+      "meter_reading": {
+        "default": "mdi:meter-electric"
+      }
+    }
+  }
+}

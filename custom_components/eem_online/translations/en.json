@@ -1,0 +1,74 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to EEM Online",
+        "description": "This is an unofficial community integration and is not affiliated with or supported by EEM. Add one EEM Online account and electricity contract.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "contract": "Contract number"
+        },
+        "data_description": {
+          "username": "The username used to sign in to EEM Online.",
+          "password": "The password used to sign in to EEM Online.",
+          "contract": "The numeric EEM electricity contract number."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate {name}",
+        "description": "EEM Online rejected the saved credentials. Enter the current credentials for {name}.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        },
+        "data_description": {
+          "username": "The username used to sign in to EEM Online.",
+          "password": "The current password for this account."
+        }
+      },
+      "reconfigure": {
+        "title": "Update EEM Online credentials",
+        "description": "Update credentials without changing the contract or its Energy history.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        },
+        "data_description": {
+          "username": "The username used to sign in to EEM Online.",
+          "password": "The current password for this account."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to EEM Online.",
+      "invalid_auth": "EEM Online rejected the username or password.",
+      "invalid_contract": "The contract number must contain digits only.",
+      "invalid_response": "EEM Online returned data in an unsupported format.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This EEM contract is already configured.",
+      "reauth_successful": "Reauthentication was successful.",
+      "reconfigure_successful": "The credentials were updated."
+    }
+  },
+  "exceptions": {
+    "authentication_failed": {
+      "message": "EEM Online rejected the saved credentials."
+    },
+    "update_failed": {
+      "message": "Unable to update EEM Online data."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "latest_consumption": {
+        "name": "Latest daily consumption"
+      },
+      "meter_reading": {
+        "name": "Meter reading"
+      }
+    }
+  }
+}
