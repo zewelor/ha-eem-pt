@@ -83,11 +83,8 @@ not prove that a zero-valued day is complete.
 
 ## Development
 
-This repository was initialized from
-[`jpawlowski/hacs.integration_blueprint`](https://github.com/jpawlowski/hacs.integration_blueprint)
-at `0df158948e717acac4fe19fc51f40e31bd090bae`. Development and tests are pinned to Home
-Assistant Core `2026.9.2` (`33c3e0cca60e73a8c4970ee677d75b8bc6464cdf`) and Python
-3.14.2 or newer.
+The project structure and development tooling are based on the
+[HACS Integration Blueprint](https://github.com/jpawlowski/hacs.integration_blueprint).
 
 ```bash
 script/setup/bootstrap
