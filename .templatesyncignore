@@ -125,6 +125,12 @@ docs/
 # Keep this file in your control — customize the schedule,
 # add PAT secrets, or adjust PR settings as you see fit.
 .github/workflows/template-sync.yml
+.github/dependabot.yml
+.github/renovate.json
+.github/workflows/dependabot-ha-stability-check.yml
+.github/workflows/copilot-setup-steps.yml
+.github/workflows/lint.yml
+.github/workflows/validate.yml
 
 # ── Lockfiles ────────────────────────────────────────────────
 # Manage your own lockfile to avoid noisy, conflict-prone PRs.
