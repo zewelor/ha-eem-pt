@@ -169,7 +169,7 @@ def _normalize_meter_reading(
         except ValueError:
             continue
         value = float(raw_value)
-        if day < start or day > end or not isfinite(value) or value < 0:
+        if day < start or day > end or not isfinite(value) or value <= 0:
             continue
         values[day] = value
 

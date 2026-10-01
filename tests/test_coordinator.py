@@ -55,22 +55,18 @@ def test_normalize_meter_reading_uses_latest_day_and_last_duplicate() -> None:
     )
 
 
-def test_normalize_meter_reading_does_not_turn_missing_values_into_zero() -> None:
-    """Missing, null, invalid, and out-of-range records do not create a value."""
+def test_normalize_meter_reading_rejects_missing_and_nonpositive_values() -> None:
+    """Missing, null, invalid, zero, and out-of-range records do not create a value."""
     readings = [
         {"data": "2026-09-12T00:00:00"},
         {"data": "2026-09-12T00:00:00", "totalRegistadores": None},
         {"data": "invalid", "totalRegistadores": 12.0},
         {"data": "2026-09-12T00:00:00", "totalRegistadores": -1.0},
+        {"data": "2026-09-12T00:00:00", "totalRegistadores": 0.0},
         {"data": "2026-08-31T00:00:00", "totalRegistadores": 12.0},
     ]
 
     assert _normalize_meter_reading(readings, date(2026, 9, 1), date(2026, 9, 12)) is None
-    assert _normalize_meter_reading(
-        [{"data": "2026-09-12T00:00:00", "totalRegistadores": 0.0}],
-        date(2026, 9, 1),
-        date(2026, 9, 12),
-    ) == (date(2026, 9, 12), 0.0)
 
 
 def _coordinator(

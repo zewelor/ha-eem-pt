@@ -1,16 +1,94 @@
 """Tests for setup, entities, and device ownership."""
 
 from dataclasses import replace
+from unittest.mock import AsyncMock
 
+from freezegun.api import FrozenDateTimeFactory
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed
 
-from custom_components.eem_online.const import DOMAIN
+from custom_components.eem_online.const import DOMAIN, UPDATE_INTERVAL
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import ATTR_DEVICE_CLASS, ATTR_UNIT_OF_MEASUREMENT, UnitOfEnergy
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.util import dt as dt_util
+
+
+@pytest.mark.freeze_time("2026-09-13 12:00:00+00:00")
+async def test_meter_reading_ignores_zero_placeholders_across_updates(
+    recorder_mock: object,
+    hass: HomeAssistant,
+    config_entry: MockConfigEntry,
+    mock_api_client: AsyncMock,
+    mock_statistics: AsyncMock,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """Zero duplicates and newer placeholders cannot overwrite an actual reading."""
+    mock_api_client.async_get_meter_readings.return_value = [
+        {"data": "2026-09-11T00:00:00", "totalRegistadores": 10182.0},
+        {"data": "2026-09-11T12:00:00", "totalRegistadores": 0.0},
+        {"data": "2026-09-12T00:00:00", "totalRegistadores": 0.0},
+    ]
+    config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    entity_id = "sensor.eem_online_123456_meter_reading"
+    state = hass.states.get(entity_id)
+    assert state is not None
+    assert state.state == "10182.0"
+    assert state.attributes["reading_date"] == "2026-09-11"
+
+    mock_api_client.async_get_meter_readings.return_value = [
+        {"data": "2026-09-12T00:00:00", "totalRegistadores": 0.0},
+    ]
+    freezer.tick(UPDATE_INTERVAL)
+    async_fire_time_changed(hass, dt_util.utcnow())
+    await hass.async_block_till_done()
+    assert mock_api_client.async_get_meter_readings.await_count == 2
+    state = hass.states.get(entity_id)
+    assert state is not None
+    assert state.state == "10182.0"
+    assert state.attributes["reading_date"] == "2026-09-11"
+
+    mock_api_client.async_get_meter_readings.return_value = [
+        {"data": "2026-09-13T00:00:00", "totalRegistadores": 10195.0},
+    ]
+    freezer.tick(UPDATE_INTERVAL)
+    async_fire_time_changed(hass, dt_util.utcnow())
+    await hass.async_block_till_done()
+    assert mock_api_client.async_get_meter_readings.await_count == 3
+    state = hass.states.get(entity_id)
+    assert state is not None
+    assert state.state == "10195.0"
+    assert state.attributes["reading_date"] == "2026-09-13"
+
+
+@pytest.mark.freeze_time("2026-09-13 12:00:00+00:00")
+async def test_zero_only_meter_readings_at_startup_remain_unknown(
+    recorder_mock: object,
+    hass: HomeAssistant,
+    config_entry: MockConfigEntry,
+    mock_api_client: AsyncMock,
+    mock_statistics: AsyncMock,
+) -> None:
+    """A successful request with only placeholders cannot invent a meter reading."""
+    mock_api_client.async_get_meter_readings.return_value = [
+        {"data": "2026-09-12T00:00:00", "totalRegistadores": 0.0},
+    ]
+    config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    state = hass.states.get("sensor.eem_online_123456_meter_reading")
+    assert state is not None
+    assert state.state == "unknown"
+    assert state.attributes["reading_date"] is None
+    consumption = hass.states.get("sensor.eem_online_123456_latest_daily_consumption")
+    assert consumption is not None
+    assert consumption.state == "3.5"
 
 
 @pytest.mark.freeze_time("2026-09-13 12:00:00+00:00")
