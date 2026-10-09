@@ -137,6 +137,9 @@ docs/
 # Run `uv lock` manually after updating requirements*.txt.
 uv.lock
 
+# The blueprint lockfile can downgrade project-managed feature versions and digests.
+.devcontainer/devcontainer-lock.json
+
 # ── GitHub Issue Templates ───────────────────────────────────
 # Issue templates are shipped once with the blueprint and then
 # maintained per-project. They don't need to be kept in sync.
