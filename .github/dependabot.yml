@@ -1,4 +1,4 @@
-# Dependabot maintains Features and their lockfile; Renovate owns Actions, Python and npm.
+# Dependabot maintains Features and their lockfile; Renovate handles Actions and selected Python updates.
 version: 2
 updates:
   - package-ecosystem: "devcontainers"
