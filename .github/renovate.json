@@ -1,10 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "github>zewelor/renovate-config//presets/github-actions"
-  ],
-  "enabledManagers": ["github-actions", "pip_requirements", "npm"],
+  "extends": ["config:recommended", "github>zewelor/renovate-config//presets/github-actions"],
+  "enabledManagers": ["github-actions", "pip_requirements"],
   "timezone": "Europe/Lisbon",
   "schedule": ["* * * * 1"],
   "internalChecksFilter": "strict",
@@ -16,7 +13,7 @@
   "automergeStrategy": "squash",
   "platformAutomerge": false,
   "ignoreTests": false,
-  "ignoreDeps": ["homeassistant", "pytest-homeassistant-custom-component"],
+  "ignoreDeps": ["homeassistant", "pytest-homeassistant-custom-component", "skills-ref"],
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
@@ -36,24 +33,27 @@
       "groupName": "GitHub Actions"
     },
     {
-      "matchManagers": ["pip_requirements", "npm"],
-      "minimumReleaseAge": "7 days"
-    },
-    {
-      "matchManagers": ["pip_requirements", "npm"],
-      "matchUpdateTypes": ["patch"],
-      "minimumReleaseAge": "3 days"
+      "matchManagers": ["github-actions"],
+      "matchDepTypes": ["action"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
     },
     {
       "matchManagers": ["pip_requirements"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "Python dependencies"
+      "minimumReleaseAge": "7 days"
     },
     {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "Node development dependencies",
-      "groupSlug": "node-development-dependencies"
+      "matchManagers": ["pip_requirements"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["pip_requirements"],
+      "matchFileNames": ["requirements_dev.txt"],
+      "matchPackageNames": ["colorlog", "isal", "zlib_ng", "zlib-ng"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "Python development dependencies",
+      "automerge": true
     }
   ]
 }
