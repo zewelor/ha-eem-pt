@@ -1,6 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended",
+    "github>zewelor/renovate-config//presets/github-actions"
+  ],
   "enabledManagers": ["github-actions", "pip_requirements", "npm"],
   "timezone": "Europe/Lisbon",
   "schedule": ["* * * * 1"],
@@ -30,8 +33,7 @@
       "matchManagers": ["github-actions"],
       "matchDepTypes": ["action"],
       "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
-      "groupName": "GitHub Actions",
-      "automerge": true
+      "groupName": "GitHub Actions"
     },
     {
       "matchManagers": ["pip_requirements", "npm"],
